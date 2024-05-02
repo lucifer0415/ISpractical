@@ -1,0 +1,70 @@
+def generate_key_matrix(key):
+  """
+  Generates a 5x5 key matrix from the given key.
+  """
+  key = key.upper().replace("J", "I").replace(" ", "")
+  alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ"
+  matrix = []
+  for char in key:
+    if char not in matrix:
+      matrix.append(char)
+  for char in alphabet:
+    if char not in matrix:
+      matrix.append(char)
+  return [matrix[i:i+5] for i in range(0, len(matrix), 5)]
+
+def find_index(char, matrix):
+  """
+  Finds the row and column index of a character in the key matrix.
+  """
+  for i, row in enumerate(matrix):
+    for j, col in enumerate(row):
+      if col == char:
+        return i, j
+
+def encrypt(message, key):
+  """
+  Encrypts the message using the Playfair cipher.
+  """
+  matrix = generate_key_matrix(key)
+  ciphertext = ""
+  message = message.upper().replace("J", "I").replace(" ", "")
+  for i in range(0, len(message), 2):
+    if i < len(message) - 1 and message[i] == message[i+1]:
+      message = message[:i+1] + 'X' + message[i+1:]
+  for i in range(0, len(message), 2):
+    a1, b1 = find_index(message[i], matrix)
+    a2, b2 = find_index(message[i+1], matrix)
+    if a1 == a2:
+      ciphertext += matrix[a1][(b1 + 1) % 5] + matrix[a1][(b2 + 1) % 5]
+    elif b1 == b2:
+      ciphertext += matrix[(a1 + 1) % 5][b1] + matrix[(a2 + 1) % 5][b2]
+    else:
+      ciphertext += matrix[a1][b2] + matrix[a2][b1]
+  return ciphertext
+
+def decrypt(ciphertext, key):
+  """
+  Decrypts the ciphertext using the Playfair cipher.
+  """
+  matrix = generate_key_matrix(key)
+  message = ""
+  for i in range(0, len(ciphertext), 2):
+    a1, b1 = find_index(ciphertext[i], matrix)
+    a2, b2 = find_index(ciphertext[i+1], matrix)
+    if a1 == a2:
+      message += matrix[a1][(b1 - 1) % 5] + matrix[a1][(b2 - 1) % 5]
+    elif b1 == b2:
+      message += matrix[(a1 - 1) % 5][b1] + matrix[(a2 - 1) % 5][b2]
+    else:
+      message += matrix[a1][b2] + matrix[a2][b1]
+  return message.replace("X", "")
+
+# Example usage
+key = "MONARCHY"
+message = "MEET ME AT THE PARK TOMORROW NIGHT"
+ciphertext = encrypt(message, key)
+print("Encrypted message:", ciphertext)
+
+decrypted_message = decrypt(ciphertext, key)
+print("Decrypted message:", decrypted_message)
