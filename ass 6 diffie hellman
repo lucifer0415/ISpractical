@@ -1,0 +1,34 @@
+def mod_exp(base, exp, mod):
+    result = 1
+    base = base % mod
+    while exp > 0:
+        if exp % 2 == 1:
+            result = (result * base) % mod
+        exp = exp >> 1
+        base = (base * base) % mod
+    return result
+
+def diffie_hellman(prime, primitive_root, private_key):
+    public_key = mod_exp(primitive_root, private_key, prime)
+    return public_key
+
+def shared_secret_key(prime, public_key, private_key):
+    secret_key = mod_exp(public_key, private_key, prime)
+    return secret_key
+
+# Example usage:
+prime = 23
+primitive_root = 5
+alice_private_key = 6
+bob_private_key = 15
+
+alice_public_key = diffie_hellman(prime, primitive_root, alice_private_key)
+bob_public_key = diffie_hellman(prime, primitive_root, bob_private_key)
+
+alice_shared_secret = shared_secret_key(prime, bob_public_key, alice_private_key)
+bob_shared_secret = shared_secret_key(prime, alice_public_key, bob_private_key)
+
+print("Alice's public key:", alice_public_key)
+print("Bob's public key:", bob_public_key)
+print("Alice's shared secret key:", alice_shared_secret)
+print("Bob's shared secret key:", bob_shared_secret)
